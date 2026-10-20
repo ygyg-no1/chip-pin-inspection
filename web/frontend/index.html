@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>芯片引脚智能检测系统 Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#165DFF",
+                        secondary: "#36D399",
+                        danger: "#F87272",
+                        warning: "#FBBD23",
+                        info: "#3ABFF8",
+                        dark: {
+                            100: "#1E293B",
+                            200: "#0F172A",
+                            300: "#020617",
+                        },
+                        light: {
+                            100: "#F8FAFC",
+                            200: "#E2E8F0",
+                            300: "#CBD5E1",
+                        }
+                    },
+                    fontFamily: {
+                        sans: ["Inter", "system-ui", "sans-serif"],
+                        mono: ["JetBrains Mono", "Consolas", "monospace"]
+                    },
+                    boxShadow: {
+                        "card": "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+                        "hover": "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+                        "glow": "0 0 15px rgba(22, 93, 255, 0.3)"
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto { content-visibility: auto; }
+            .text-gradient { background-clip: text; -webkit-background-clip: text; color: transparent; }
+            .bg-blur { backdrop-filter: blur(8px); }
+            .transition-all-300 { transition: all 300ms ease-in-out; }
+            .scrollbar-hide::-webkit-scrollbar { display: none; }
+            .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        }
+    </style>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gradient-to-br from-dark-200 to-dark-300 text-light-100 font-sans min-h-screen">
+    <header class="sticky top-0 z-50 bg-dark-100/70 bg-blur border-b border-white/10">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-r from-primary to-info flex items-center justify-center shadow-glow">
+                    <i class="fa fa-microchip text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-light-100">芯片引脚智能检测系统</h1>
+                    <p class="text-xs text-light-300 -mt-1">V2.0 | 高精度AI检测引擎</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-2 bg-dark-200/50 px-3 py-1.5 rounded-full">
+                    <span class="inline-block w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+                    <span class="text-xs text-light-200">AI引擎就绪</span>
+                </div>
+                <button id="themeToggle" class="w-9 h-9 rounded-full bg-dark-200/50 flex items-center justify-center hover:bg-dark-200 transition-all-300">
+                    <i class="fa fa-sun-o text-light-200"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+        <div class="mb-8 text-center">
+            <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold bg-gradient-to-r from-primary to-info text-gradient">
+                芯片引脚自动检测与分析
+            </h2>
+            <p class="text-light-300 mt-2 max-w-2xl mx-auto">
+                基于深度学习的高精度引脚检测系统，自动识别引脚数量与位置，快速检测缺失情况
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-dark-100 rounded-xl p-5 border border-white/10 shadow-card hover:shadow-hover transition-all-300 transform hover:-translate-y-1">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-light-300 text-sm">系统状态</p>
+                        <h3 class="text-2xl font-semibold mt-1 flex items-center">
+                            运行中
+                            <span class="ml-2 w-2 h-2 rounded-full bg-secondary"></span>
+                        </h3>
+                    </div>
+                    <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                        <i class="fa fa-check-circle text-primary text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-dark-100 rounded-xl p-5 border border-white/10 shadow-card hover:shadow-hover transition-all-300 transform hover:-translate-y-1">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-light-300 text-sm">已处理图像</p>
+                        <h3 class="text-2xl font-semibold mt-1" id="processedCount">0</h3>
+                    </div>
+                    <div class="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center">
+                        <i class="fa fa-image text-secondary text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-dark-100 rounded-xl p-5 border border-white/10 shadow-card hover:shadow-hover transition-all-300 transform hover:-translate-y-1">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-light-300 text-sm">检测精度</p>
+                        <h3 class="text-2xl font-semibold mt-1">99.2<span class="text-sm">%</span></h3>
+                    </div>
+                    <div class="w-12 h-12 rounded-full bg-info/10 flex items-center justify-center">
+                        <i class="fa fa-tachometer text-info text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <div class="lg:col-span-2 bg-dark-100 rounded-xl p-6 border border-white/10 shadow-card">
+                <div class="flex items-center mb-6">
+                    <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mr-3">
+                        <i class="fa fa-folder-open text-primary"></i>
+                    </div>
+                    <h2 class="text-xl font-semibold">路径配置</h2>
+                </div>
+                
+                <div class="space-y-5">
+                    <!-- 原始图像目录：支持文件夹选择 -->
+                    <div class="space-y-2">
+                        <label class="block text-sm text-light-300">
+                            原始图像目录 
+                            <span class="text-xs text-info">(选择存放芯片图像的文件夹)</span>
+                        </label>
+                        <div class="flex">
+                            <input type="text" id="rawImageDir" placeholder="例如：D:/images/chip" 
+                                   class="flex-1 bg-dark-200 border border-white/10 rounded-l-lg px-4 py-3 text-light-100 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all-300">
+                            <button id="selectRawImgDir" class="bg-primary hover:bg-primary/90 text-white px-4 py-3 rounded-r-lg transition-all-300">
+                                <i class="fa fa-folder"></i> 选择文件夹
+                            </button>
+                        </div>
+                        <p class="text-xs text-light-300 mt-1">
+                            支持PNG/JPG/BMP格式图像，<span id="rawImgCount" class="text-secondary">0</span> 张有效图像
+                        </p>
+                    </div>
+                    
+                    <!-- JSON输出目录：支持文件夹选择 -->
+                    <div class="space-y-2">
+                        <label class="block text-sm text-light-300">
+                            JSON输出目录 
+                            <span class="text-xs text-info">(选择存放标注结果的文件夹)</span>
+                        </label>
+                        <div class="flex">
+                            <input type="text" id="jsonOutputDir" placeholder="例如：D:/results/json" 
+                                   class="flex-1 bg-dark-200 border border-white/10 rounded-l-lg px-4 py-3 text-light-100 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all-300">
+                            <button id="selectJsonDir" class="bg-primary hover:bg-primary/90 text-white px-4 py-3 rounded-r-lg transition-all-300">
+                                <i class="fa fa-folder"></i> 选择文件夹
+                            </button>
+                        </div>
+                        <p class="text-xs text-light-300 mt-1">
+                            标注结果将以JSON格式保存，<span id="jsonFileCount" class="text-secondary">0</span> 个已存在JSON文件
+                        </p>
+                    </div>
+                    
+                    <!-- 检测结果目录：支持文件夹选择 -->
+                    <div class="space-y-2">
+                        <label class="block text-sm text-light-300">
+                            检测结果目录 
+                            <span class="text-xs text-info">(选择存放检测图像的文件夹)</span>
+                        </label>
+                        <div class="flex">
+                            <input type="text" id="detectionResultDir" placeholder="例如：D:/results/detection" 
+                                   class="flex-1 bg-dark-200 border border-white/10 rounded-l-lg px-4 py-3 text-light-100 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all-300">
+                            <button id="selectOutputDir" class="bg-primary hover:bg-primary/90 text-white px-4 py-3 rounded-r-lg transition-all-300">
+                                <i class="fa fa-folder"></i> 选择文件夹
+                            </button>
+                        </div>
+                        <p class="text-xs text-light-300 mt-1">
+                            带引脚标注的图像将保存至此，<span id="detectImgCount" class="text-secondary">0</span> 个已存在检测图像
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-dark-100 rounded-xl p-6 border border-white/10 shadow-card">
+                <div class="flex items-center mb-6">
+                    <div class="w-10 h-10 rounded-lg bg-info/10 flex items-center justify-center mr-3">
+                        <i class="fa fa-key text-info"></i>
+                    </div>
+                    <h2 class="text-xl font-semibold">百度AI配置</h2>
+                </div>
+                
+                <div class="space-y-4">
+                    <div class="space-y-2">
+                        <label class="block text-sm text-light-300">App ID</label>
+                        <input type="text" id="appid" placeholder="输入百度AI App ID" 
+                               class="w-full bg-dark-200 border border-white/10 rounded-lg px-4 py-3 text-light-100 focus:outline-none focus:border-info focus:ring-1 focus:ring-info transition-all-300">
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <label class="block text-sm text-light-300">API Key</label>
+                        <input type="text" id="apiKey" placeholder="输入百度AI API Key" 
+                               class="w-full bg-dark-200 border border-white/10 rounded-lg px-4 py-3 text-light-100 focus:outline-none focus:border-info focus:ring-1 focus:ring-info transition-all-300">
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <label class="block text-sm text-light-300">Secret Key</label>
+                        <input type="text" id="secretKey" placeholder="输入百度AI Secret Key" 
+                               class="w-full bg-dark-200 border border-white/10 rounded-lg px-4 py-3 text-light-100 focus:outline-none focus:border-info focus:ring-1 focus:ring-info transition-all-300">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-dark-100 rounded-xl p-6 border border-white/10 shadow-card mb-8">
+            <div class="flex flex-wrap justify-between items-center mb-6">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 rounded-lg bg-secondary/10 flex items-center justify-center mr-3">
+                        <i class="fa fa-cogs text-secondary"></i>
+                    </div>
+                    <h2 class="text-xl font-semibold">任务控制</h2>
+                </div>
+                
+                <div class="flex items-center mt-4 md:mt-0 w-full md:w-auto">
+                    <span class="text-sm text-light-300 mr-2" id="progressText">进度：0%</span>
+                    <div class="flex-1 md:flex-none md:w-48 h-2 bg-dark-200 rounded-full overflow-hidden">
+                        <div id="progressBar" class="h-full bg-gradient-to-r from-primary to-info w-0 transition-all duration-500"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <button id="testBtn" class="bg-dark-200 hover:bg-dark-200/80 text-light-100 rounded-lg px-4 py-3 transition-all-300 flex items-center justify-center group">
+                    <i class="fa fa-check-circle mr-2 text-light-300 group-hover:text-info transition-all-300"></i>
+                    <span>测试配置</span>
+                </button>
+                
+                <button id="annotateBtn" class="bg-gradient-to-r from-primary to-info hover:opacity-90 text-white rounded-lg px-4 py-3 transition-all-300 shadow-glow flex items-center justify-center group">
+                    <i class="fa fa-pencil mr-2 group-hover:scale-110 transition-all-300"></i>
+                    <span>生成标注JSON</span>
+                </button>
+                
+                <button id="detectBtn" class="bg-gradient-to-r from-secondary to-emerald-500 hover:opacity-90 text-white rounded-lg px-4 py-3 transition-all-300 shadow-glow flex items-center justify-center group">
+                    <i class="fa fa-search-plus mr-2 group-hover:scale-110 transition-all-300"></i>
+                    <span>执行引脚检测</span>
+                </button>
+                
+                <button id="clearLogBtn" class="bg-dark-200 hover:bg-dark-200/80 text-light-100 rounded-lg px-4 py-3 transition-all-300 flex items-center justify-center group">
+                    <i class="fa fa-trash mr-2 text-light-300 group-hover:text-danger transition-all-300"></i>
+                    <span>清空日志</span>
+                </button>
+            </div>
+        </div>
+
+        <div id="detectionPreview" class="bg-dark-100 rounded-xl p-6 border border-white/10 shadow-card mb-8 hidden">
+            <div class="flex items-center mb-6">
+                <div class="w-10 h-10 rounded-lg bg-info/10 flex items-center justify-center mr-3">
+                    <i class="fa fa-eye text-info"></i>
+                </div>
+                <h2 class="text-xl font-semibold">检测结果预览</h2>
+                <button id="closePreview" class="ml-auto text-light-300 hover:text-light-100 transition-all-300">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            
+            <div id="imageList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                <!-- 动态加载检测结果图片 -->
+            </div>
+        </div>
+
+        <div class="bg-dark-100 rounded-xl p-6 border border-white/10 shadow-card">
+            <div class="flex flex-wrap items-center justify-between mb-6">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 rounded-lg bg-dark-200 flex items-center justify-center mr-3">
+                        <i class="fa fa-terminal text-light-300"></i>
+                    </div>
+                    <h2 class="text-xl font-semibold">系统日志</h2>
+                </div>
+                
+                <div class="flex space-x-3 mt-4 md:mt-0">
+                    <div class="flex space-x-2">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                            <i class="fa fa-info-circle mr-1"></i> 信息
+                        </span>
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-secondary/10 text-secondary">
+                            <i class="fa fa-check mr-1"></i> 成功
+                        </span>
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-warning/10 text-warning">
+                            <i class="fa fa-exclamation-triangle mr-1"></i> 警告
+                        </span>
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-danger/10 text-danger">
+                            <i class="fa fa-times mr-1"></i> 错误
+                        </span>
+                    </div>
+                    
+                    <button class="text-sm bg-dark-200 hover:bg-dark-200/80 text-light-200 rounded px-3 py-1.5 transition-all-300 flex items-center">
+                        <i class="fa fa-download mr-1"></i> 导出日志
+                    </button>
+                </div>
+            </div>
+            
+            <div id="logContainer" class="bg-dark-200 rounded-lg p-4 h-72 overflow-y-auto font-mono text-sm scrollbar-hide">
+                <div class="text-light-300">[2024-01-01 00:00:00] [INFO] 系统已启动，支持手动输入文件夹路径或直接选择文件夹</div>
+                <div class="text-light-300 mt-2">[2024-01-01 00:00:05] [INFO] 路径输入后将自动验证并统计文件数量</div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-dark-100 border-t border-white/10 py-6 mt-12">
+        <div class="container mx-auto px-4 text-center text-light-300 text-sm">
+            <p>© 2024 芯片引脚智能检测系统 | 基于YOLOv8与百度AI开发</p>
+            <p class="mt-2">专业级芯片检测解决方案 | 精度优先 · 高效稳定</p>
+        </div>
+    </footer>
+
+    <div id="defectModal" class="fixed inset-0 bg-dark-900/80 flex items-center justify-center z-50 opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-dark-800 rounded-xl p-6 border border-white/10 max-w-md w-full">
+            <h3 class="text-xl font-bold mb-4">芯片引脚缺失检测结果</h3>
+            <div id="defectList" class="max-h-60 overflow-y-auto space-y-3">
+                <!-- 动态渲染缺陷详情 -->
+            </div>
+            <button id="closeDefectModal" class="mt-4 bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg w-full transition-colors">
+                确认
+            </button>
+        </div>
+    </div>
+
+    <div id="imageModal" class="fixed inset-0 bg-dark-900/95 flex items-center justify-center z-50 opacity-0 pointer-events-none transition-opacity duration-300">
+        <button id="closeImageModal" class="absolute top-6 right-6 text-white text-2xl hover:text-light-300 transition-all-300">
+            <i class="fa fa-times"></i>
+        </button>
+        <div class="max-w-4xl w-full px-4">
+            <img id="modalImage" src="" alt="检测结果图片" class="max-h-[80vh] mx-auto">
+            <div class="text-center mt-4 text-light-200">
+                <span id="modalImageName"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 文件夹选择器 -->
+    <input type="file" id="folderSelector" class="hidden" webkitdirectory directory multiple>
+
+    <div id="notification" class="fixed bottom-6 right-6 max-w-xs bg-dark-100 border border-white/10 rounded-lg p-4 shadow-card transform translate-y-20 opacity-0 transition-all duration-500 z-50">
+        <div class="flex items-start">
+            <div id="notificationIcon" class="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center mr-3 flex-shrink-0">
+                <i class="fa fa-info text-primary"></i>
+            </div>
+            <div>
+                <h3 id="notificationTitle" class="font-medium text-light-100"></h3>
+                <p id="notificationMessage" class="text-sm text-light-300 mt-1"></p>
+            </div>
+            <button id="closeNotification" class="ml-auto text-light-300 hover:text-light-100 transition-all-300">
+                <i class="fa fa-times"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let currentDetectionTaskId = null;
+
+        // 工具函数：更新时间格式
+        function updateTime() {
+            const now = new Date();
+            return now.toLocaleString('zh-CN', { 
+                year: 'numeric', 
+                month: '2-digit', 
+                day: '2-digit', 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit' 
+            });
+        }
+
+        // 通知提示
+        function showNotification(title, message, type = 'info') {
+            const notification = document.getElementById('notification');
+            const titleEl = document.getElementById('notificationTitle');
+            const messageEl = document.getElementById('notificationMessage');
+            const iconEl = document.getElementById('notificationIcon');
+
+            titleEl.textContent = title;
+            messageEl.textContent = message;
+
+            const colorMap = {
+                info: { bg: 'bg-primary/10', icon: 'fa-info', text: 'text-primary' },
+                success: { bg: 'bg-secondary/10', icon: 'fa-check', text: 'text-secondary' },
+                warning: { bg: 'bg-warning/10', icon: 'fa-exclamation-triangle', text: 'text-warning' },
+                error: { bg: 'bg-danger/10', icon: 'fa-times', text: 'text-danger' }
+            };
+            const config = colorMap[type];
+            iconEl.className = `w-6 h-6 rounded-full ${config.bg} flex items-center justify-center mr-3 flex-shrink-0`;
+            iconEl.innerHTML = `<i class="fa ${config.icon} ${config.text}"></i>`;
+
+            notification.classList.remove('translate-y-20', 'opacity-0');
+            notification.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                hideNotification();
+            }, 3000);
+
+            document.getElementById('closeNotification').onclick = hideNotification;
+        }
+
+        function hideNotification() {
+            const notification = document.getElementById('notification');
+            notification.classList.remove('translate-y-0', 'opacity-100');
+            notification.classList.add('translate-y-20', 'opacity-0');
+        }
+
+        // 文件夹选择逻辑（核心修复）
+        const folderSelector = document.getElementById('folderSelector');
+        const rawImageDirInput = document.getElementById('rawImageDir');
+        const jsonOutputDirInput = document.getElementById('jsonOutputDir');
+        const detectionResultDirInput = document.getElementById('detectionResultDir');
+
+        // 处理文件夹选择
+        function handleFolderSelection(inputElement, e) {
+            try {
+                if (!e.target.files || e.target.files.length === 0) {
+                    throw new Error("未选择文件夹");
+                }
+
+                // 获取选中的文件夹路径
+                const file = e.target.files[0];
+                const fullPath = file.webkitRelativePath || file.path;
+                const folderPath = fullPath.split('/')[0] || fullPath.split('\\')[0];
+
+                // 特殊处理：如果是直接选择文件夹（非子文件）
+                if (folderPath === fullPath) {
+                    inputElement.value = folderPath;
+                } else {
+                    // 从文件路径中提取文件夹路径
+                    const pathSeparator = fullPath.includes('/') ? '/' : '\\';
+                    const folderPath = fullPath.substring(0, fullPath.lastIndexOf(pathSeparator));
+                    inputElement.value = folderPath;
+                }
+
+                // 验证路径并统计文件
+                validatePathAndCountFiles(inputElement);
+                showNotification('选择成功', `已选择目录：${inputElement.value}`, 'success');
+            } catch (error) {
+                showNotification('选择失败', `文件夹选择出错：${error.message}`, 'error');
+                console.error('文件夹选择错误:', error);
+            } finally {
+                folderSelector.value = '';
+            }
+        }
+
+        // 验证路径并统计文件（新增功能）
+        function validatePathAndCountFiles(inputElement) {
+            const path = inputElement.value.trim();
+            if (!path) return;
+
+            // 根据输入框ID判断目录类型
+            if (inputElement.id === 'rawImageDir') {
+                // 统计原始图像文件
+                fetch('http://127.0.0.1:8000/api/count-images', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ dir: path })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('rawImgCount').textContent = data.count || 0;
+                    if (data.error) {
+                        addLog(`原始图像目录错误：${data.error}`, 'warning');
+                    }
+                })
+                .catch(err => {
+                    addLog(`无法统计图像数量：${err.message}`, 'warning');
+                });
+            } 
+            else if (inputElement.id === 'jsonOutputDir') {
+                // 统计JSON文件
+                fetch('http://127.0.0.1:8000/api/check-json', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ json_dir: path })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('jsonFileCount').textContent = data.count || 0;
+                })
+                .catch(err => {
+                    addLog(`无法统计JSON文件：${err.message}`, 'warning');
+                });
+            }
+            else if (inputElement.id === 'detectionResultDir') {
+                // 统计检测结果图像
+                fetch('http://127.0.0.1:8000/api/count-detected-images', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ dir: path })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('detectImgCount').textContent = data.count || 0;
+                })
+                .catch(err => {
+                    addLog(`无法统计检测图像：${err.message}`, 'warning');
+                });
+            }
+        }
+
+        // 绑定文件夹选择按钮
+        document.getElementById('selectRawImgDir').addEventListener('click', () => {
+            folderSelector.onchange = (e) => handleFolderSelection(rawImageDirInput, e);
+            folderSelector.click();
+        });
+
+        document.getElementById('selectJsonDir').addEventListener('click', () => {
+            folderSelector.onchange = (e) => handleFolderSelection(jsonOutputDirInput, e);
+            folderSelector.click();
+        });
+
+        document.getElementById('selectOutputDir').addEventListener('click', () => {
+            folderSelector.onchange = (e) => handleFolderSelection(detectionResultDirInput, e);
+            folderSelector.click();
+        });
+
+        // 手动输入路径后验证
+        [rawImageDirInput, jsonOutputDirInput, detectionResultDirInput].forEach(input => {
+            input.addEventListener('blur', () => {
+                validatePathAndCountFiles(input);
+            });
+        });
+
+        // 日志添加函数
+        function addLog(content, type = 'info') {
+            const logContainer = document.getElementById('logContainer');
+            const timeStr = updateTime();
+            const typeMap = {
+                info: 'INFO',
+                success: 'SUCCESS',
+                warning: 'WARNING',
+                error: 'ERROR'
+            };
+            const colorMap = {
+                info: 'text-primary',
+                success: 'text-secondary',
+                warning: 'text-warning',
+                error: 'text-danger'
+            };
+            const logItem = document.createElement('div');
+            logItem.className = 'mt-2 text-light-200 opacity-0 transform translate-y-2 transition-all duration-300';
+            logItem.innerHTML = `
+                <span class="text-light-400">[${timeStr}]</span> 
+                <span class="${colorMap[type]}">[${typeMap[type]}]</span> 
+                <span>${content}</span>
+            `;
+            logContainer.appendChild(logItem);
+            
+            setTimeout(() => {
+                logItem.classList.remove('opacity-0', 'translate-y-2');
+            }, 10);
+            
+            logContainer.scrollTop = logContainer.scrollHeight;
+
+            if (type === 'success' && (content.includes('标注成功') || content.includes('检测结果已保存'))) {
+                const countEl = document.getElementById('processedCount');
+                countEl.textContent = parseInt(countEl.textContent) + 1;
+            }
+        }
+
+        // 清空日志
+        document.getElementById('clearLogBtn').addEventListener('click', () => {
+            const logContainer = document.getElementById('logContainer');
+            logContainer.innerHTML = `<div class="text-light-300">[${updateTime()}] [INFO] 日志已清空</div>`;
+            showNotification('操作成功', '系统日志已清空', 'success');
+        });
+
+        // 测试配置
+        document.getElementById('testBtn').addEventListener('click', async () => {
+            addLog('开始验证配置有效性', 'info');
+            let success = true;
+
+            const rawDir = rawImageDirInput.value.trim();
+            if (!rawDir) {
+                addLog('原始图像目录未设置', 'error');
+                success = false;
+            } else {
+                addLog(`原始图像目录格式校验通过：${rawDir}`, 'success');
+            }
+
+            const jsonDir = jsonOutputDirInput.value.trim();
+            if (!jsonDir) {
+                addLog('JSON输出目录未设置', 'error');
+                success = false;
+            } else {
+                addLog(`JSON输出目录格式校验通过：${jsonDir}`, 'success');
+            }
+
+            const outputDir = detectionResultDirInput.value.trim();
+            if (!outputDir) {
+                addLog('检测结果目录未设置', 'error');
+                success = false;
+            } else {
+                addLog(`检测结果目录格式校验通过：${outputDir}`, 'success');
+            }
+
+            const appid = document.getElementById('appid').value.trim();
+            const apiKey = document.getElementById('apiKey').value.trim();
+            const secretKey = document.getElementById('secretKey').value.trim();
+            if (!appid || !apiKey || !secretKey) {
+                addLog('AI配置未完整填写（仅影响标注功能）', 'warning');
+            } else {
+                addLog('AI配置已完整填写', 'success');
+            }
+
+            if (success) {
+                addLog('所有配置格式均有效', 'success');
+                showNotification('验证成功', '所有配置项均符合要求', 'success');
+            } else {
+                addLog('部分配置存在问题，请检查日志', 'warning');
+                showNotification('验证失败', '部分配置项未设置', 'warning');
+            }
+        });
+
+        // 按钮状态控制
+        function setButtonsDisabled(disabled) {
+            const buttons = [
+                document.getElementById('annotateBtn'),
+                document.getElementById('detectBtn'),
+                document.getElementById('testBtn'),
+                document.getElementById('clearLogBtn')
+            ];
+            buttons.forEach(btn => {
+                btn.disabled = disabled;
+                if (disabled) {
+                    btn.classList.add('opacity-50', 'cursor-not-allowed');
+                } else {
+                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+            });
+        }
+
+        // 进度更新
+        function updateProgress(value) {
+            document.getElementById('progressBar').style.width = `${value}%`;
+            document.getElementById('progressText').textContent = `进度：${value}%`;
+        }
+
+        // 标注任务
+        document.getElementById('annotateBtn').addEventListener('click', async () => {
+            const rawDir = rawImageDirInput.value.trim();
+            const jsonDir = jsonOutputDirInput.value.trim();
+            const appid = document.getElementById('appid').value.trim();
+            const apiKey = document.getElementById('apiKey').value.trim();
+            const secretKey = document.getElementById('secretKey').value.trim();
+
+            const missing = [];
+            if (!rawDir) missing.push('原始图像目录');
+            if (!jsonDir) missing.push('JSON输出目录');
+            if (!appid) missing.push('App ID');
+            if (!apiKey) missing.push('API Key');
+            if (!secretKey) missing.push('Secret Key');
+
+            if (missing.length > 0) {
+                showNotification('参数缺失', `请完善以下配置：${missing.join(', ')}`, 'error');
+                return;
+            }
+
+            setButtonsDisabled(true);
+            addLog('开始标注任务，请勿刷新页面', 'info');
+            updateProgress(0);
+            showNotification('任务启动', '标注任务已开始执行', 'info');
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/annotate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        raw_img_dir: rawDir,
+                        json_output_dir: jsonDir,
+                        appid: appid,
+                        client_id: apiKey,
+                        client_secret: secretKey
+                    })
+                });
+
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.message || '标注任务失败');
+
+                const pollAnnotationProgress = async (taskId) => {
+                    const progressRes = await fetch(`http://127.0.0.1:8000/api/progress/${taskId}`);
+                    const progressData = await progressRes.json();
+                    
+                    updateProgress(progressData.data.progress);
+                    
+                    const logContainer = document.getElementById('logContainer');
+                    const existingLogs = logContainer.querySelectorAll('div');
+                    const newLogs = progressData.data.logs.slice(existingLogs.length - 1);
+                    
+                    newLogs.forEach(log => {
+                        const logItem = document.createElement('div');
+                        logItem.className = 'mt-2 text-light-200 opacity-0 transform translate-y-2 transition-all duration-300';
+                        logItem.innerHTML = `
+                            <span class="text-light-400">[${log.timestamp}]</span> 
+                            <span class="text-${log.type === 'info' ? 'primary' : log.type === 'success' ? 'secondary' : log.type === 'warning' ? 'warning' : 'danger'}">
+                                [${log.type.toUpperCase()}]
+                            </span> 
+                            <span>${log.content}</span>
+                        `;
+                        logContainer.appendChild(logItem);
+                        setTimeout(() => {
+                            logItem.classList.remove('opacity-0', 'translate-y-2');
+                        }, 10);
+                    });
+                    
+                    logContainer.scrollTop = logContainer.scrollHeight;
+                    
+                    document.getElementById('processedCount').textContent = progressData.data.processed_count;
+                    
+                    if (!progressData.data.completed) {
+                        setTimeout(() => pollAnnotationProgress(taskId), 1000);
+                    } else {
+                        setButtonsDisabled(false);
+                        showNotification('任务完成', '标注任务已成功执行', 'success');
+                        // 刷新JSON文件计数
+                        validatePathAndCountFiles(jsonOutputDirInput);
+                    }
+                };
+                
+                pollAnnotationProgress(data.task_id);
+
+            } catch (error) {
+                addLog(`标注任务失败：${error.message}`, 'error');
+                showNotification('任务失败', `标注任务执行失败：${error.message}`, 'error');
+                setButtonsDisabled(false);
+                updateProgress(0);
+            }
+        });
+
+        // 检测任务
+        document.getElementById('detectBtn').addEventListener('click', async () => {
+            const rawDir = rawImageDirInput.value.trim();
+            const jsonDir = jsonOutputDirInput.value.trim();
+            const outputDir = detectionResultDirInput.value.trim();
+
+            const missing = [];
+            if (!rawDir) missing.push('原始图像目录');
+            if (!jsonDir) missing.push('JSON输出目录');
+            if (!outputDir) missing.push('检测结果目录');
+
+            if (missing.length > 0) {
+                showNotification('参数缺失', `请完善以下配置：${missing.join(', ')}`, 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/check-json', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ json_dir: jsonDir })
+                });
+                const data = await response.json();
+                if (!data.has_json) {
+                    showNotification('无标注数据', 'JSON目录中未发现标注文件，请先执行标注', 'warning');
+                    return;
+                }
+            } catch (error) {
+                addLog(`检查标注文件失败：${error.message}`, 'error');
+                return;
+            }
+
+            setButtonsDisabled(true);
+            addLog('开始检测任务，请勿刷新页面', 'info');
+            updateProgress(0);
+            showNotification('任务启动', '检测任务已开始执行', 'info');
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/detect', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        raw_img_dir: rawDir,
+                        json_dir: jsonDir,
+                        output_dir: outputDir
+                    })
+                });
+
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.message || '检测任务失败');
+
+                currentDetectionTaskId = data.task_id;
+
+                const pollDetectionProgress = async (taskId) => {
+                    const progressRes = await fetch(`http://127.0.0.1:8000/api/progress/${taskId}`);
+                    const progressData = await progressRes.json();
+                    
+                    updateProgress(progressData.data.progress);
+                    
+                    const logContainer = document.getElementById('logContainer');
+                    const existingLogs = logContainer.querySelectorAll('div');
+                    const newLogs = progressData.data.logs.slice(existingLogs.length - 1);
+                    
+                    newLogs.forEach(log => {
+                        const logItem = document.createElement('div');
+                        logItem.className = 'mt-2 text-light-200 opacity-0 transform translate-y-2 transition-all duration-300';
+                        logItem.innerHTML = `
+                            <span class="text-light-400">[${log.timestamp}]</span> 
+                            <span class="text-${log.type === 'info' ? 'primary' : log.type === 'success' ? 'secondary' : log.type === 'warning' ? 'warning' : 'danger'}">
+                                [${log.type.toUpperCase()}]
+                            </span> 
+                            <span>${log.content}</span>
+                        `;
+                        logContainer.appendChild(logItem);
+                        setTimeout(() => {
+                            logItem.classList.remove('opacity-0', 'translate-y-2');
+                        }, 10);
+                    });
+                    
+                    logContainer.scrollTop = logContainer.scrollHeight;
+                    
+                    document.getElementById('processedCount').textContent = progressData.data.processed_count;
+                    
+                    if (!progressData.data.completed) {
+                        setTimeout(() => pollDetectionProgress(taskId), 1000);
+                    } else {
+                        renderDefectDetails(progressData.data.defect_details);
+                        setButtonsDisabled(false);
+                        showNotification('任务完成', '检测任务已成功执行', 'success');
+                        // 刷新检测图像计数
+                        validatePathAndCountFiles(detectionResultDirInput);
+                    }
+                };
+                
+                pollDetectionProgress(data.task_id);
+
+            } catch (error) {
+                addLog(`检测任务失败：${error.message}`, 'error');
+                showNotification('任务失败', `检测任务执行失败：${error.message}`, 'error');
+                setButtonsDisabled(false);
+                updateProgress(0);
+            }
+        });
+
+        // 渲染缺陷详情
+        function renderDefectDetails(details) {
+            const modal = document.getElementById('defectModal');
+            const listEl = document.getElementById('defectList');
+            listEl.innerHTML = '';
+
+            if (!details || details.length === 0) {
+                listEl.innerHTML = '<div class="text-light-300 text-center py-4">所有芯片引脚均正常，无缺失</div>';
+            } else {
+                details.forEach(item => {
+                    const itemEl = document.createElement('div');
+                    itemEl.className = item.missing_pins > 0 
+                        ? 'p-3 bg-dark-700 rounded-lg border-l-4 border-warning'
+                        : 'p-3 bg-dark-700 rounded-lg border-l-4 border-secondary';
+                    
+                    itemEl.innerHTML = `
+                        <div class="font-semibold">芯片：${item.chip_name}</div>
+                        <div class="${item.missing_pins > 0 ? 'text-warning' : 'text-secondary'}">
+                            ${item.missing_pins > 0 
+                                ? `引脚缺失：${item.missing_pins} 个` 
+                                : '引脚状态：正常，无缺失'}
+                        </div>
+                    `;
+                    listEl.appendChild(itemEl);
+                });
+            }
+
+            const previewBtnContainer = document.createElement('div');
+            previewBtnContainer.className = 'mt-4 text-center';
+            previewBtnContainer.innerHTML = `
+                <button id="showDetectionPreview" class="bg-info hover:bg-info/90 text-white px-4 py-2 rounded-lg transition-colors">
+                    <i class="fa fa-eye mr-1"></i> 查看检测结果图片
+                </button>
+            `;
+            listEl.parentNode.appendChild(previewBtnContainer);
+
+            document.getElementById('showDetectionPreview').addEventListener('click', () => {
+                modal.classList.add('opacity-0', 'pointer-events-none');
+                loadDetectionImages(currentDetectionTaskId);
+            });
+
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            modal.classList.add('opacity-100', 'pointer-events-auto');
+        }
+
+        // 加载检测结果图片
+        function loadDetectionImages(taskId) {
+            if (!taskId) {
+                addLog('无法加载图片：任务ID不存在', 'error');
+                return;
+            }
+
+            addLog(`正在加载检测结果图片（任务ID：${taskId}）...`, 'info');
+            const previewSection = document.getElementById('detectionPreview');
+            const imageList = document.getElementById('imageList');
+            imageList.innerHTML = '<div class="col-span-full text-center py-8">加载中...</div>';
+
+            previewSection.classList.remove('hidden');
+            previewSection.scrollIntoView({ behavior: 'smooth' });
+
+            fetch(`http://127.0.0.1:8000/api/detection-images/${taskId}`, { timeout: 10000 })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(err => {
+                            throw new Error(err.message || `HTTP错误：${response.status}`);
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.code !== 200) {
+                        throw new Error(data.message || '获取图片列表失败');
+                    }
+
+                    if (data.data.images.length === 0) {
+                        imageList.innerHTML = `
+                            <div class="col-span-full text-center py-8 text-light-300">
+                                未找到检测结果图片<br>
+                                检测目录：${data.data.output_dir || '未知'}
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    imageList.innerHTML = '';
+                    data.data.images.forEach(img => {
+                        const displayName = img.name.replace('_detected', '');
+                        
+                        const imgCard = document.createElement('div');
+                        imgCard.className = 'bg-dark-200 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all-300 cursor-pointer group';
+                        imgCard.innerHTML = `
+                            <div class="h-48 overflow-hidden bg-dark-300 flex items-center justify-center">
+                                <img src="${img.url}" alt="${displayName}" 
+                                     class="max-w-full max-h-full object-contain p-2 group-hover:scale-105 transition-transform duration-300">
+                            </div>
+                            <div class="p-3">
+                                <p class="text-sm truncate">${displayName}</p>
+                            </div>
+                        `;
+                        
+                        imgCard.addEventListener('click', () => {
+                            showImageModal(img.url, displayName);
+                        });
+                        
+                        imageList.appendChild(imgCard);
+                    });
+
+                    addLog(`已加载 ${data.data.count} 张检测结果图片`, 'success');
+                })
+                .catch(error => {
+                    imageList.innerHTML = `<div class="col-span-full text-center py-8 text-danger">
+                        加载失败：${error.message}<br>
+                        请检查后端是否正常运行
+                    </div>`;
+                    addLog(`检测结果图片加载失败：${error.message}`, 'error');
+                    console.error('图片加载错误详情：', error);
+                });
+        }
+
+        // 图片预览模态框
+        function showImageModal(imageUrl, imageName) {
+            const modal = document.getElementById('imageModal');
+            const imgElement = document.getElementById('modalImage');
+            const imgNameElement = document.getElementById('modalImageName');
+
+            imgElement.src = '';
+            imgElement.alt = '加载中...';
+            imgNameElement.textContent = '加载中...';
+
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            modal.classList.add('opacity-100', 'pointer-events-auto');
+
+            imgElement.onload = () => {
+                imgNameElement.textContent = imageName;
+            };
+            imgElement.src = imageUrl;
+            imgElement.alt = imageName;
+        }
+
+        // 关闭模态框
+        document.getElementById('closeImageModal').addEventListener('click', () => {
+            const modal = document.getElementById('imageModal');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+        });
+
+        document.getElementById('closePreview').addEventListener('click', () => {
+            document.getElementById('detectionPreview').classList.add('hidden');
+        });
+
+        document.getElementById('closeDefectModal').addEventListener('click', () => {
+            const modal = document.getElementById('defectModal');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+        });
+
+        // 主题切换
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            const icon = document.getElementById('themeToggle').querySelector('i');
+            const isDark = document.body.classList.contains('from-dark-200');
+            
+            if (isDark) {
+                document.body.classList.remove('from-dark-200', 'to-dark-300');
+                document.body.classList.add('from-light-100', 'to-light-200');
+                document.body.style.color = '#0F172A';
+                icon.classList.remove('fa-sun-o');
+                icon.classList.add('fa-moon-o');
+                showNotification('主题切换', '已切换到浅色模式', 'info');
+            } else {
+                document.body.classList.add('from-dark-200', 'to-dark-300');
+                document.body.classList.remove('from-light-100', 'to-light-200');
+                document.body.style.color = '#F8FAFC';
+                icon.classList.remove('fa-moon-o');
+                icon.classList.add('fa-sun-o');
+                showNotification('主题切换', '已切换到深色模式', 'info');
+            }
+        });
+
+        // 页面加载完成
+        window.addEventListener('load', () => {
+            addLog('系统已启动，支持两种方式设置目录：', 'info');
+            addLog('1. 手动输入路径（推荐空文件夹使用），例如 D:/images', 'info');
+            addLog('2. 点击"选择文件夹"按钮直接选择目录', 'info');
+        });
+    </script>
+</body>
+</html>

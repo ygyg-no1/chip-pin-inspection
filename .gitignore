@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# 运行时产物
+output/
+results/
+*.log
+*.json.tmp
+
+# 打包与二进制
+*.exe
+*.spec
+build/
+dist/
+
+# 大文件：演示视频、答辩 PPT、报名佐证（不随代码仓库分发）
+*.mp4
+*.pptx
+*.docx

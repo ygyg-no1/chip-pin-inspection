@@ -1,0 +1,11 @@
+# 通用
+requests>=2.28
+opencv-python>=4.8
+numpy>=1.24
+
+# 桌面版（PyQt5 图形界面）
+PyQt5>=5.15
+
+# 网页版（Flask 后端）
+flask>=2.3
+flask-cors>=4.0
